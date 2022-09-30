@@ -1,0 +1,129 @@
+nepenthesApi = "http://localhost:3000/nepenthes";
+var getListNepenthes = (callback) => {
+
+    fetch(nepenthesApi)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(callback);
+}
+
+function renderNepenthes(nepenthesS) {
+    var listNepenthesSBlock = document.querySelector('#listNepenthes');
+    var htmls = nepenthesS.map((nepenthes) => {
+        return `
+            <li class="nepenthes-item-${nepenthes.id}">
+                <h4 id="name-${nepenthes.id}">${nepenthes.name}</h4>
+                <h4 id="type-${nepenthes.id}">${nepenthes.type}</h4>
+                <button onclick="handleDeleteNepenthes(${nepenthes.id})">Xoá</button>
+                <button onclick="handleUpdateForm(${nepenthes.id})">Sửa</button>
+            </li>
+        `
+    })
+    listNepenthesSBlock.innerHTML = htmls.join('');
+}
+
+
+
+function handleCreateForm() {
+    var createBtn = document.querySelector('#create_editBtn');
+
+    createBtn.onclick = function () {
+        var name = document.querySelector('input[name="name"]').value;
+        var type = document.querySelector('input[name="type"]').value;
+
+        var formData = {
+            name: name,
+            type: type
+        };
+        createNepenthes(formData, function () {
+            getListNepenthes(renderNepenthes);
+        });
+    }
+}
+
+function createNepenthes(data, callback) {
+    var options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }
+    fetch(nepenthesApi, options)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(callback)
+
+}
+
+function handleDeleteNepenthes(id) {
+    var options = {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+
+    }
+    fetch(nepenthesApi + '/' + id, options)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function () {
+            var nepenthesItem = document.querySelector('.nepenthes-item-' + id)
+            if (nepenthesItem) {
+                nepenthesItem.remove();
+            }
+
+        })
+
+}
+
+function handleUpdateForm(id) {
+    var nepenthesItem = document.querySelector('.nepenthes-item-' + id);
+    var nameNeedUpdate = nepenthesItem.querySelector('#name-' + id);
+    var typeNeedUpdate = nepenthesItem.querySelector('#type-' + id);
+    var name = document.querySelector('input[name="name"]');
+    var type = document.querySelector('input[name="type"]');
+    name.value = nameNeedUpdate.innerText;
+    type.value = typeNeedUpdate.innerText;
+    var editBtn = document.querySelector('#create_editBtn');
+    editBtn.textContent = 'Lưu';
+    editBtn.onclick = function () {
+        var data = {
+            name: name.value,
+            type: type.value
+        }
+        name.value = '';
+        type.value = '';
+        var option = {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }
+        fetch(nepenthesApi + '/' + id, option)
+            .then(function (reponse) {
+                return reponse.json();
+            })
+            .then(function () {
+                getListNepenthes(renderNepenthes);
+            })
+            .then(handleCreateForm());
+
+    }
+
+}
+
+
+
+function start() {
+    getListNepenthes(function (nepenthesS) {
+        renderNepenthes(nepenthesS);
+    })
+    handleCreateForm();
+}
+
+start();
