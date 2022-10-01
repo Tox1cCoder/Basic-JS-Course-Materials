@@ -1,18 +1,3 @@
-/**
- * 1. Render songs => OK
- * 2. Play / Pause / Seek => OK
- * 3. CD rotate => OK
- * 4. Next / Previous => OK
- * 5. Show / Hide Playlist => OK
- * 6. Random => OK
- * 7. Next / Repeat when ended => OK
- * 8. Active song => OK
- * 9. Scroll active song into  => OK
- * 10. Play song when click => OK
- * 11. Volumn => OK
- * 12. Change tooltip => OK
- */
-
 const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
 
@@ -51,6 +36,7 @@ const app = {
     isHoldProgressBar: false,
     isHoldVolumeBar: false,
     isFavourite: false,
+
     songs: [
         {
             name: 'Matane Ga Areba',
@@ -59,7 +45,6 @@ const app = {
             path: './assets/music/song1.mp3'
         }
     ],
-
 
     renderSong() {
         const htmls = this.songs.map((song, index) => {
@@ -88,7 +73,6 @@ const app = {
         playlistList.innerHTML = htmls.join('')
     },
 
-
     activeSong() {
         const songs = $$('.playlist__item')
         const musicWaves = $$('.music-waves')
@@ -110,9 +94,8 @@ const app = {
         })
     },
 
-
     defineProperties() {
-        Object.defineProperty(this, 'currenSong', {
+        Object.defineProperty(this, 'currentSong', {
             get: () => this.songs[this.currentIndex]
         })
     },
@@ -129,14 +112,12 @@ const app = {
 
     loadCurrentSong() {
         const _this = this
-        songName.textContent = this.currenSong.name
-        songAuthor.textContent = this.currenSong.author
-        cd.src = this.currenSong.image
-        audio.src = this.currenSong.path
+        songName.textContent = this.currentSong.name
+        songAuthor.textContent = this.currentSong.author
+        cd.src = this.currentSong.image
+        audio.src = this.currentSong.path
         progress.style.width = 0
 
-
-        // Xử lý lấy tiến trình và thời lượng bài hát trước khi phát
         audio.onloadedmetadata = function () {
             songCurrentTime.textContent = _this.timeFormat(this.currentTime.toFixed(2))
             songDuration.textContent = _this.timeFormat(this.duration.toFixed(2))
@@ -157,7 +138,6 @@ const app = {
         this.activeSong()
     },
 
-    // Xử lý random song nhưng sẽ hết tất cả các bài
     randomSong() {
         let random
         do {
@@ -181,7 +161,6 @@ const app = {
         const _this = this
         _this.activeSong()
 
-        // Xử lý quay CD khi play / pause nhạc
         const cdRotate = cd.animate({
             transform: ['rotate(0)', 'rotate(360deg)']
         },
@@ -191,8 +170,6 @@ const app = {
             })
         cdRotate.pause()
 
-
-        // Xử lý Play / Pause khi click
         playBtn.onclick = function () {
             if (_this.isPlaying) {
                 audio.pause()
@@ -211,16 +188,12 @@ const app = {
             _this.isPlaying = false
         }
 
-
-        // Xử lý thời current time và thanh tiến trình 
         audio.ontimeupdate = function () {
             songCurrentTime.textContent = _this.timeFormat(this.currentTime)
             const progressPercent = this.currentTime / this.duration * 100
             progress.style.width = progressPercent + '%'
         }
 
-
-        // Xử lý Next / Previous Song
         prevBtn.onclick = function () {
             if (_this.isRepeat) {
                 _this.repeatSong()
@@ -252,9 +225,6 @@ const app = {
             }
         }
 
-
-        // Xử lý next bài, random bài hoặc phát lại khi hết bài
-        // Khi lặp thì không phát ngẫu nhiên
         repeatBtn.onclick = function () {
             _this.isRepeat = !_this.isRepeat
             this.classList.toggle('active', _this.isRepeat)
@@ -389,9 +359,6 @@ const app = {
             _this.isHoldVolumeBar = false
         }
 
-
-        // Xử lý Keyboard Events
-        // Ấn space để Play / Pause Music
         document.onkeyup = function (e) {
             if (e.which === 32) {
                 playBtn.click()
@@ -401,16 +368,12 @@ const app = {
 
 
     start() {
-        // Định nghĩa các thuộc tính
         this.defineProperties()
 
-        // Xử lý render bài hát ra Playlist
         this.renderSong()
 
-        // Tải bài hát hiện tại vào UI để sẵn sàng phát nhạc
         this.loadCurrentSong()
 
-        // Lắng nghe, xử lý các sự kiện (DOM Events)
         this.handleEvents()
     }
 }
